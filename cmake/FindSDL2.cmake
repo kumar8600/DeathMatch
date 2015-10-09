@@ -1,0 +1,70 @@
+# - Try to find SDL2 library
+# Once done this will define
+#
+# SDL2_FOUND
+# SDL2_INCLUDE_DIRS
+# SDL2_LIBRARIES
+# SDL2_DEFINITIONS
+#
+
+find_package(PkgConfig)
+pkg_check_modules(PC_SDL2 QUIET sdl2)
+set(SDL2_DEFINITIONS ${PC_SDL2_CFLAGS_OTHER})
+
+if(WIN32)
+  set(DEPS_DIR ../DeathMatchDepsWin)
+  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(DEPS_LIBDIR_PREFIX ${DEPS_DIR}/lib/x64)
+  else()
+    set(DEPS_LIBDIR_PREFIX ${DEPS_DIR}/lib/Win32)
+  endif()
+  include_directories(${DEPS_DIR}/include)
+endif()
+
+find_path(SDL2_INCLUDE_DIR SDL.h
+  HINTS ${PC_SDL2_INCLUDEDIR} ${PC_SDL2_INCLUDE_DIRS}
+  PATHS ${DEPS_DIR}/include
+)
+
+find_library(SDL2_LIBRARY_DEBUG NAMES SDL2
+  HINTS ${PC_SDL2_LIBDIR} ${PC_SDL2_LIBRARY_DIRS}
+  PATHS ${DEPS_LIBDIR_PREFIX}/Debug
+)
+
+find_library(SDL2_MAIN_LIBRARY_DEBUG NAMES SDL2main
+  HINTS ${PC_SDL2_LIBDIR} ${PC_SDL2_LIBRARY_DIRS}
+  PATHS ${DEPS_LIBDIR_PREFIX}/Debug
+)
+
+find_library(SDL2_LIBRARY_OPTIMIZED NAMES SDL2
+  HINTS ${PC_SDL2_LIBDIR} ${PC_SDL2_LIBRARY_DIRS}
+  PATHS ${DEPS_LIBDIR_PREFIX}/Release
+)
+
+find_library(SDL2_MAIN_LIBRARY_OPTIMIZED NAMES SDL2main
+  HINTS ${PC_SDL2_LIBDIR} ${PC_SDL2_LIBRARY_DIRS}
+  PATHS ${DEPS_LIBDIR_PREFIX}/Release
+)
+
+set(SDL2_LIBRARIES
+  debug ${SDL2_LIBRARY_DEBUG}
+  debug ${SDL2_MAIN_LIBRARY_DEBUG}
+  optimized ${SDL2_LIBRARY_OPTIMIZED}
+  optimized ${SDL2_MAIN_LIBRARY_OPTIMIZED}
+)
+set(SDL2_INCLUDE_DIRS ${SDL2_INCLUDE_DIR})
+
+include(FindPackageHandleStandardArgs)
+# handle the QUIETLY and REQUIRED arguments and set SDL2_FOUND to TRUE
+# if all listed variables are TRUE
+find_package_handle_standard_args(SDL2 DEFAULT_MSG
+  SDL2_LIBRARY_DEBUG SDL2_LIBRARY_OPTIMIZED SDL2_INCLUDE_DIR
+)
+
+mark_as_advanced(
+  SDL2_INCLUDE_DIR
+  SDL2_LIBRARY_DEBUG
+  SDL2_MAIN_LIBRARY_DEBUG
+  SDL2_LIBRARY_OPTIMIZED
+  SDL2_MAIN_LIBRARY_OPTIMIZED
+)
